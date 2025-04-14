@@ -1,43 +1,42 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import {
-  formatDate,
-  DateSelectArg,
-  EventClickArg,
-  EventApi,
-} from "@fullcalendar/core";
+import React, { useState, useEffect, useRef } from "react";
+import { formatDate, DateSelectArg, EventClickArg } from "@fullcalendar/core";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import axios from "axios";
+import { v4 as uuidv4 } from "uuid";
 
-const Calendar: React.FC = () => {
-  const [currentEvents, setCurrentEvents] = useState<EventApi[]>([]);
+interface CalendarEvent {
+  id: string;
+  title: string;
+  start: string | Date;
+  end?: string | Date;
+  allDay?: boolean;
+}
+
+interface CalendarProps {
+  initialEvents: CalendarEvent[];
+}
+
+const Calendar: React.FC<CalendarProps> = ({ initialEvents }) => {
+  const [currentEvents, setCurrentEvents] = useState<CalendarEvent[]>(initialEvents);
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
   const [newEventTitle, setNewEventTitle] = useState<string>("");
   const [selectedDate, setSelectedDate] = useState<DateSelectArg | null>(null);
+  const [aiInput, setAiInput] = useState<string>("");
+  const [aiFeedback, setAiFeedback] = useState<string>("");
+  const calendarRef = useRef<FullCalendar>(null);
 
   useEffect(() => {
-    // Load events from local storage when the component mounts
-    if (typeof window !== "undefined") {
-      const savedEvents = localStorage.getItem("events");
-      if (savedEvents) {
-        setCurrentEvents(JSON.parse(savedEvents));
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    // Save events to local storage whenever they change
-    if (typeof window !== "undefined") {
-      localStorage.setItem("events", JSON.stringify(currentEvents));
+    if (calendarRef.current) {
+      calendarRef.current.getApi().removeAllEvents();
+      currentEvents.forEach(event => {
+        calendarRef.current?.getApi().addEvent(event);
+      });
     }
   }, [currentEvents]);
 
@@ -46,103 +45,144 @@ const Calendar: React.FC = () => {
     setIsDialogOpen(true);
   };
 
-  const handleEventClick = (selected: EventClickArg) => {
-    // Prompt user for confirmation before deleting an event
-    if (
-      window.confirm(
-        `Are you sure you want to delete the event "${selected.event.title}"?`
-      )
-    ) {
-      selected.event.remove();
+  const handleEventClick = async (selected: EventClickArg) => {
+    if (window.confirm(`Delete "${selected.event.title}"?`)) {
+      try {
+        await axios.delete("/api/events", { data: { id: selected.event.id } });
+        setCurrentEvents(prev => prev.filter(event => event.id !== selected.event.id));
+      } catch (error) {
+        console.error("Error deleting event:", error);
+      }
     }
   };
 
-  const handleCloseDialog = () => {
-    setIsDialogOpen(false);
-    setNewEventTitle("");
-  };
-
-  const handleAddEvent = (e: React.FormEvent) => {
+  const handleAddEvent = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newEventTitle && selectedDate) {
-      const calendarApi = selectedDate.view.calendar; // Get the calendar API instance.
-      calendarApi.unselect(); // Unselect the date range.
-
-      const newEvent = {
-        id: `${selectedDate.start.toISOString()}-${newEventTitle}`,
+    if (newEventTitle && selectedDate && calendarRef.current) {
+      const newEvent: CalendarEvent = {
+        id: uuidv4(),
         title: newEventTitle,
         start: selectedDate.start,
         end: selectedDate.end,
         allDay: selectedDate.allDay,
       };
 
-      calendarApi.addEvent(newEvent);
-      handleCloseDialog();
+      try {
+        const response = await axios.post("/api/events", newEvent);
+        setCurrentEvents(prev => [...prev, response.data]);
+        setNewEventTitle("");
+        setIsDialogOpen(false);
+      } catch (error) {
+        console.error("Error saving event:", error);
+      }
+    }
+  };
+
+  const handleAiSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAiFeedback(""); // Clear previous feedback
+    if (!aiInput) {
+      setAiFeedback("⚠️ Please describe your event.");
+      return;
+    }
+
+    try {
+      const response = await axios.post("/api/parse", {
+        text: aiInput,
+        events: currentEvents,
+      });
+
+      const newEvent = {
+        ...response.data.event,
+        id: response.data.event.id || uuidv4(),
+      };
+
+      setCurrentEvents(prev => [...prev, newEvent]);
+      setAiFeedback(response.data.message || "✅ Event added successfully!");
+      setAiInput("");
+    } catch (error: any) {
+      if (axios.isAxiosError(error) && error.response?.status === 409) {
+        const { message, suggestedEvent } = error.response.data;
+        setAiFeedback(`⛔ Conflict: ${message}\nSuggested: "${suggestedEvent.title}"`);
+      } else {
+        setAiFeedback("❌ Failed to create event. Please try again.");
+      }
+      console.error("AI error:", error);
     }
   };
 
   return (
-    <div>
-      <div className="flex w-full px-10 justify-start items-start gap-8">
-        <div className="w-3/12">
-          <div className="py-10 text-2xl font-extrabold px-7">
-            Calendar Events
-          </div>
-          <ul className="space-y-4">
-            {currentEvents.length <= 0 && (
-              <div className="italic text-center text-gray-400">
-                No Events Present
-              </div>
-            )}
-
-            {currentEvents.length > 0 &&
-              currentEvents.map((event: EventApi) => (
-                <li
-                  className="border border-gray-200 shadow px-4 py-2 rounded-md text-blue-800"
-                  key={event.id}
-                >
-                  {event.title}
-                  <br />
-                  <label className="text-slate-950">
-                    {formatDate(event.start!, {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    })}{" "}
-                    {/* Format event start date */}
-                  </label>
-                </li>
-              ))}
-          </ul>
-        </div>
-
-        <div className="w-9/12 mt-8">
-          <FullCalendar
-            height={"85vh"}
-            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]} // Initialize calendar with required plugins.
-            headerToolbar={{
-              left: "prev,next today",
-              center: "title",
-              right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek",
-            }} // Set header toolbar options.
-            initialView="dayGridMonth" // Initial view mode of the calendar.
-            editable={true} // Allow events to be edited.
-            selectable={true} // Allow dates to be selectable.
-            selectMirror={true} // Mirror selections visually.
-            dayMaxEvents={true} // Limit the number of events displayed per day.
-            select={handleDateClick} // Handle date selection to create new events.
-            eventClick={handleEventClick} // Handle clicking on events (e.g., to delete them).
-            eventsSet={(events) => setCurrentEvents(events)} // Update state with current events whenever they change.
-            initialEvents={
-              typeof window !== "undefined"
-                ? JSON.parse(localStorage.getItem("events") || "[]")
-                : []
-            } // Initial events loaded from local storage.
+    <div className="flex w-full px-10 justify-start items-start gap-8">
+      {/* Left sidebar */}
+      <div className="w-3/12">
+        <div className="py-10 text-2xl font-extrabold px-7">Calendar Events</div>
+        <form onSubmit={handleAiSubmit} className="mb-4">
+          <input
+            type="text"
+            placeholder="e.g., Schedule a meeting next Tuesday at 3 PM"
+            value={aiInput}
+            onChange={(e) => setAiInput(e.target.value)}
+            className="border border-gray-200 p-3 rounded-md text-lg w-full"
           />
-        </div>
+          <button
+            type="submit"
+            className="bg-blue-500 text-white p-3 mt-2 rounded-md w-full"
+          >
+            Add with AI
+          </button>
+        </form>
+        {aiFeedback && (
+          <div className="text-sm text-gray-800 whitespace-pre-line p-2 border rounded bg-gray-100">
+            {aiFeedback}
+          </div>
+        )}
+        <ul className="space-y-4 mt-4">
+          {currentEvents.length === 0 ? (
+            <div className="italic text-center text-gray-400">No Events Present</div>
+          ) : (
+            currentEvents.map((event) => (
+              <li
+                className="border border-gray-200 shadow px-4 py-2 rounded-md text-blue-800"
+                key={event.id}
+              >
+                {event.title}
+                <br />
+                <label className="text-slate-950">
+                  {formatDate(event.start, {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </label>
+              </li>
+            ))
+          )}
+        </ul>
       </div>
 
-      {/* Dialog for adding new events */}
+      {/* Calendar */}
+      <div className="w-9/12 mt-8">
+        <FullCalendar
+          ref={calendarRef}
+          height={"85vh"}
+          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+          headerToolbar={{
+            left: "prev,next today",
+            center: "title",
+            right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek",
+          }}
+          initialView="dayGridMonth"
+          editable={true}
+          selectable={true}
+          selectMirror={true}
+          dayMaxEvents={true}
+          select={handleDateClick}
+          eventClick={handleEventClick}
+          events={currentEvents}
+        />
+      </div>
+
+      {/* Add Event Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -153,7 +193,7 @@ const Calendar: React.FC = () => {
               type="text"
               placeholder="Event Title"
               value={newEventTitle}
-              onChange={(e) => setNewEventTitle(e.target.value)} // Update new event title as the user types.
+              onChange={(e) => setNewEventTitle(e.target.value)}
               required
               className="border border-gray-200 p-3 rounded-md text-lg"
             />
@@ -162,8 +202,7 @@ const Calendar: React.FC = () => {
               type="submit"
             >
               Add
-            </button>{" "}
-            {/* Button to submit new event */}
+            </button>
           </form>
         </DialogContent>
       </Dialog>
@@ -171,7 +210,4 @@ const Calendar: React.FC = () => {
   );
 };
 
-export default Calendar; // Export the Calendar component for use in other parts of the application.
-
-
-
+export default Calendar;

@@ -1,0 +1,76 @@
+{
+  "events": [
+    {
+      "title": "cricket month",
+      "start": "2025-04-01T06:30:00.000Z",
+      "end": "2025-04-01T07:30:00.000Z",
+      "allDay": true
+    },
+    {
+      "title": "cricket",
+      "start": "2025-04-16T06:30:00.000Z",
+      "end": "2025-04-16T07:30:00.000Z",
+      "allDay": true
+    },
+    {
+      "title": "cricket",
+      "start": "2025-04-15T15:30:00.000Z",
+      "end": "2025-04-15T16:30:00.000Z",
+      "allDay": false
+    },
+    {
+      "title": "dinner",
+      "start": "2025-04-15T16:30:00.000Z",
+      "end": "2025-04-15T17:30:00.000Z",
+      "allDay": false
+    },
+    {
+      "title": "golf",
+      "start": "2025-04-15T17:30:00.000Z",
+      "end": "2025-04-15T18:30:00.000Z",
+      "allDay": false
+    },
+    {
+      "title": "dinner",
+      "start": "2025-04-15T12:16:45.575Z",
+      "end": "2025-04-15T13:16:45.575Z",
+      "allDay": true
+    },
+    {
+      "title": "dinner",
+      "start": "2025-04-14T16:50:00.000Z",
+      "end": "2025-04-14T17:50:00.000Z",
+      "allDay": false
+    },
+    {
+      "title": "dinner",
+      "start": "2025-04-15T06:30:00.000Z",
+      "end": "2025-04-15T07:30:00.000Z",
+      "allDay": false
+    },
+    {
+      "title": "meeting sriram year",
+      "start": "2026-04-14T12:25:55.966Z",
+      "end": "2026-04-14T13:25:55.966Z",
+      "allDay": true
+    },
+    {
+      "title": "meeting",
+      "start": "2025-04-11T06:30:00.000Z",
+      "end": "2025-04-11T07:30:00.000Z",
+      "allDay": true
+    },
+    {
+      "title": "meeting rohit",
+      "start": "2025-04-14T11:30:00.000Z",
+      "end": "2025-04-14T12:30:00.000Z",
+      "allDay": false
+    },
+    {
+      "title": "meeting rohit",
+      "start": "2025-04-19T12:30:00.000Z",
+      "end": "2025-04-19T13:30:00.000Z",
+      "allDay": false
+    }
+  ]
+}
