@@ -9,7 +9,6 @@ import interactionPlugin from "@fullcalendar/interaction";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
-import "./calender.css";
 
 interface CalendarEvent {
   id: string;
