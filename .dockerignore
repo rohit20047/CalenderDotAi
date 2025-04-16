@@ -1,0 +1,40 @@
+# === Node & Build Files ===
+node_modules/
+.next/
+.npm
+.pnpm
+.yarn/
+dist/
+out/
+
+# === Logs & Cache ===
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.cache/
+
+# === Environment Files ===
+.env*
+.env.local
+.env.development
+.env.test
+.env.production
+
+# === IDE & Editor ===
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# === Git ===
+.git/
+.gitignore
+.gitattributes
+
+# === Misc ===
+*.md
+LICENSE
+.dockerignore
+Dockerfile

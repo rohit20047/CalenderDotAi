@@ -35,7 +35,7 @@ export async function POST(request: Request) {
     await db.read();
 
     // Parse request body
-    const { text, events: existingEvents = [] }: { text: string; events?: Event[] } = await request.json();
+    const { text }: { text: string; events?: Event[] } = await request.json();
 
     if (!text || typeof text !== "string") {
       return NextResponse.json(
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
     }
 
     const firstResult = results[0];
-    let start = firstResult.start?.date();
+    const start = firstResult.start?.date();
     let end = firstResult.end?.date();
 
     if (!start || isNaN(start.getTime())) {

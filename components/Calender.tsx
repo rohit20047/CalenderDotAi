@@ -100,7 +100,7 @@ const Calendar: React.FC<CalendarProps> = ({ initialEvents }) => {
       setCurrentEvents(prev => [...prev, newEvent]);
       setAiFeedback(response.data.message || "✅ Event added successfully!");
       setAiInput("");
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (axios.isAxiosError(error) && error.response?.status === 409) {
         const { message, suggestedEvent } = error.response.data;
         setAiFeedback(`⛔ Conflict: ${message}\nSuggested: "${suggestedEvent.title}"`);

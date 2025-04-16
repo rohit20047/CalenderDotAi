@@ -1,5 +1,12 @@
 import Calendar from "@/components/Calender";
 
+
+type CalendarEvent = {
+  title: string;
+  start: string;
+  end: string;
+  allDay: boolean;
+};
 async function getInitialEvents() {
   try {
     console.log("Attempting to fetch events from /api/events...");
@@ -10,7 +17,7 @@ async function getInitialEvents() {
     }
     const data = await response.json();
     console.log("Fetched data:", data);
-    return data.map((e: any) => ({
+    return data.map((e: CalendarEvent) => ({
       id: `${e.start}-${e.title}`,
       title: e.title,
       start: e.start,
