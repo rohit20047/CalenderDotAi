@@ -1,8 +1,23 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+# CalendarDotAI 
 
-First, run the development server:
+CalendarDotAI is your AI-driven scheduling assistant — a smart calendar with chat-based interactions. Think of it as "Your AI Scheduler", enabling you to interact with your calendar using natural language. Add, delete, or update events just by chatting. Built with Next.js and designed for speed, flexibility, and seamless deployment.
+
+##  Getting Started (Locally)
+
+This is a Next.js project bootstrapped with create-next-app.
+
+### 📦 Install Dependencies
+
+```bash
+npm install
+# or
+yarn
+# or
+pnpm install
+```
+
+### 🧪 Start the Development Server
 
 ```bash
 npm run dev
@@ -14,23 +29,48 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visit http://localhost:3000 in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+You can start editing the main page by modifying:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+`app/page.tsx`
 
-## Learn More
+The page auto-updates as you save.
 
-To learn more about Next.js, take a look at the following resources:
+This project uses next/font to optimize and load Geist, a modern typeface from Vercel.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🐳 Docker Setup (Cross-Platform)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 📌 Build Docker Image
 
-## Deploy on Vercel
+```bash
+docker build -t calenderdotai .
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### ▶️ Run Docker Container
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+docker run -d -p 3000:3000 --name my-calender-app calenderdotai
+```
+
+After the container starts, access your app at: http://localhost:3000
+
+✅ Works On:
+
+- 🪟 Windows (via Docker Desktop)
+- 🐧 Linux (Docker installed)
+- 🍎 macOS (via Docker Desktop)
+
+## 📚 Learn More
+
+- [Next.js Documentation](https://nextjs.org/docs) – Learn about features and API.
+- [Learn Next.js](https://nextjs.org/learn) – Interactive Next.js tutorial.
+- [Next.js GitHub Repository](https://github.com/vercel/next.js) – Feedback and contributions welcome!
+
+##  Deploy on Vercel
+
+The easiest way to deploy your Next.js app is via the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme).
+
+Read the [Next.js Deployment Docs](https://nextjs.org/docs/deployment) for more details.
+
+🧠 CalendarDotAI: Your AI Scheduler. Simple. Smart. Conversational.
